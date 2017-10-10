@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/home" />
+        <item
+            android:id="@+id/nav_reservations"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="@string/reservations" />
+        <item
+            android:id="@+id/nav_tournaments"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="@string/tournaments" />
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="@string/share" />
+            <item
+                android:id="@+id/nav_contact"
+                android:icon="@drawable/ic_menu_send"
+                android:title="@string/contact" />
+            <item
+                android:id="@+id/nav_map"
+                android:icon="@drawable/ic_menu_map"
+                android:title="@string/map" />
+        </menu>
+    </item>
+
+</menu>
