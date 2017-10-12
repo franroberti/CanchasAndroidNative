@@ -18,6 +18,7 @@ import com.example.fran.canchas2.views.MainFragment
 import android.content.Intent
 import android.support.v4.app.FragmentActivity
 import com.example.fran.canchas2.views.MapsActivity
+import com.example.fran.canchas2.views.ReservationsFragment
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -30,11 +31,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val toolbar = toolbar as Toolbar
         setSupportActionBar(toolbar)
 
-        val fab = fab as FloatingActionButton
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
+        showFragment(MainFragment())
 
         val drawer = drawer_layout as DrawerLayout
         val toggle = ActionBarDrawerToggle(
@@ -81,9 +78,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (id == R.id.nav_home) {
             //val fragment = Class.forName(MAIN_VIEWS_PACKAGE + "MainFragment")
             showFragment(MainFragment())
-
         } else if (id == R.id.nav_reservations) {
-
+            showFragment(ReservationsFragment())
         } else if (id == R.id.nav_tournaments) {
 
         } else if (id == R.id.nav_share) {
