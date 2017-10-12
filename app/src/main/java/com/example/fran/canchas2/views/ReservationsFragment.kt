@@ -28,7 +28,6 @@ class ReservationsFragment : Fragment(){
     var response: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-
         return inflater.inflate(R.layout.content_reservations,container,false)
     }
 
@@ -36,6 +35,7 @@ class ReservationsFragment : Fragment(){
         super.onViewCreated(view, savedInstanceState)
         pickDate.setOnClickListener { showDatePickerDialog(it) }
         initializeProgressBar(responseProgressBar)
+        reservationsRequest.setOnClickListener {  performSearchTask() }
     }
 
     fun initializeProgressBar(progressBar: ProgressBar){
@@ -50,11 +50,16 @@ class ReservationsFragment : Fragment(){
         val day = c.get(Calendar.DAY_OF_MONTH)
 
         val dialog = DatePickerDialog(context,
-                DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+                DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
                     datePicked.text = "$dayOfMonth/$monthOfYear/$year"
                 }, year, month, day)
         dialog.show()
 
+    }
+
+    fun performSearchTask(){
+        val searchTask = SearchTask()
+        searchTask.execute(URL(API_URL + CLUB_ID))
     }
 
     inner class SearchTask : AsyncTask<URL, Void, String>() {
@@ -80,7 +85,6 @@ class ReservationsFragment : Fragment(){
         override fun onPostExecute(searchResults: String?) {
             if (searchResults != null && searchResults != "") {
 
-                val infoView = TextView(context)
                 try {
                     val reservations = JSONArray(searchResults)
                     responseProgressBar.progress = 100

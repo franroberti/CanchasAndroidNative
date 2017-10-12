@@ -55,10 +55,11 @@
         android:text="Search" />
 
 
-        <ListView
-            android:id="@+id/reservationsList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/reservationsList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 
 </LinearLayout>
