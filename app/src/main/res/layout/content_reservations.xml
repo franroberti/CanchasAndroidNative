@@ -9,13 +9,6 @@
     tools:context="com.example.fran.canchas2.MainActivity"
     android:weightSum="1">
 
-    <ProgressBar
-        android:id="@+id/responseProgressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="invisible" />
-
     <TextView
         android:textAlignment="center"
         android:id="@+id/textView3"
@@ -54,12 +47,16 @@
         android:layout_height="wrap_content"
         android:text="Search" />
 
+    <ProgressBar
+        android:id="@+id/responseProgressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"/>
 
-    <LinearLayout
-        android:orientation="vertical"
+    <ListView
         android:id="@+id/reservationsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
 
 </LinearLayout>

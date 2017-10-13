@@ -5,6 +5,7 @@ import android.app.ListFragment
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,13 @@ import org.json.JSONException
 import java.io.IOException
 import java.net.URL
 import java.util.*
+import android.widget.ArrayAdapter
+import com.example.fran.canchas2.R.id.fieldNameView
+import com.example.fran.canchas2.R.id.reservationHour
+import com.example.fran.canchas2.R.layout.reservation_item
+import com.example.fran.canchas2.utils.Reservation
+import com.example.fran.canchas2.utils.ReservationsAdapter
+
 
 /**
  * Created by fran on 10/10/17.
@@ -34,13 +42,7 @@ class ReservationsFragment : Fragment(){
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         pickDate.setOnClickListener { showDatePickerDialog(it) }
-        initializeProgressBar(responseProgressBar)
         reservationsRequest.setOnClickListener {  performSearchTask() }
-    }
-
-    fun initializeProgressBar(progressBar: ProgressBar){
-        progressBar.progress = 0
-        progressBar.max = 100
     }
 
     fun showDatePickerDialog(view: View){
@@ -59,7 +61,10 @@ class ReservationsFragment : Fragment(){
 
     fun performSearchTask(){
         val searchTask = SearchTask()
+        reservationsList.adapter = null
         searchTask.execute(URL(API_URL + CLUB_ID))
+        responseProgressBar.visibility = View.VISIBLE
+
     }
 
     inner class SearchTask : AsyncTask<URL, Void, String>() {
@@ -85,36 +90,40 @@ class ReservationsFragment : Fragment(){
         override fun onPostExecute(searchResults: String?) {
             if (searchResults != null && searchResults != "") {
 
-                try {
-                    val reservations = JSONArray(searchResults)
-                    responseProgressBar.progress = 100
+                val reservations = JSONArray(searchResults)
+                var reservationsArray = ArrayList<Reservation>()
+                responseProgressBar.visibility = View.GONE
 
-                    for (i in 0 until reservations.length()) {
-                        var reservation = reservations.getJSONObject(i)
-                        var fieldName = reservation.getString("nombre")
-                        var reservas = reservation.getJSONArray("reservas")
-                        for (j in 0 until reservas.length()) {
-                            var textToAppend = TextView(context)
-                            textToAppend.text = fieldName + " - "
 
-                            textToAppend.append(Date(reservas.getJSONObject(i).getString("desde").toLong()).hours.toString())
-                            textToAppend.append(" hs")
+                for (i in 0 until reservations.length()) {
+                    var JSONreservation = reservations.getJSONObject(i)
+                    var fieldName = JSONreservation.getString("nombre")
+                    var reservas = JSONreservation.getJSONArray("reservas")
+                    for (j in 0 until reservas.length()) {
 
-                            reservationsList.addView(textToAppend)
-                        }
+                        var begginingHour = Date(reservas.getJSONObject(j).getString("desde").toLong()).hours.toString()
+                        var endHour = Date(reservas.getJSONObject(j).getString("hasta").toLong()).hours.toString()
+                        var reservation = Reservation(fieldName,begginingHour,endHour,"Franco")
+                        reservationsArray.add(reservation)
                     }
-                } catch (e: JSONException) {
-                    e.printStackTrace()
                 }
-                responseProgressBar.visibility = 4
+
+                val adapter = ReservationsAdapter(context,reservationsArray.filterDateResults(null))
+                reservationsList.adapter = adapter
             }
         }
 
-        fun JSONArray.filterDateResults(filterDate: Date): List<Date> {
-            var list = emptyList<Date>()
-            for (j in 0 until this.length()) {
-                if(compareDateDay(Date(this.getJSONObject(j).getString("desde").toLong()),filterDate)){
-                    list += (Date(this.getJSONObject(j).getString("desde").toLong()))
+        fun ArrayList<Reservation>.filterDateResults(filterDate: String?): ArrayList<Reservation> {
+            if(filterDate == null){
+                return this
+            }
+
+            var list = ArrayList<Reservation>()
+
+            for (j in 0 until this.size) {
+
+                if(compareDateDay(Date(this[j].reservationBegginingHour),Date(filterDate))){
+                    list.add(this[j])
                 }
             }
             return list

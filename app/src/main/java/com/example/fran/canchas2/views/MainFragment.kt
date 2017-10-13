@@ -18,7 +18,6 @@ class MainFragment : Fragment() {
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(content_main,container,false)
-        //return super.onCreateView(inflater, container, savedInstanceState)
     }
 
 }
