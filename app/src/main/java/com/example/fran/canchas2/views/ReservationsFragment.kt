@@ -25,6 +25,7 @@ import com.example.fran.canchas2.R.id.reservationHour
 import com.example.fran.canchas2.R.layout.reservation_item
 import com.example.fran.canchas2.utils.Reservation
 import com.example.fran.canchas2.utils.ReservationsAdapter
+import java.text.SimpleDateFormat
 
 
 /**
@@ -94,6 +95,9 @@ class ReservationsFragment : Fragment(){
                 var reservationsArray = ArrayList<Reservation>()
                 responseProgressBar.visibility = View.GONE
 
+                val fmtOut = SimpleDateFormat("dd-MM-yyyy hh:mm")
+                val fmtIn = SimpleDateFormat("s")
+                val filterDate = fmtOut.parse("08-06-2017 23:00")
 
                 for (i in 0 until reservations.length()) {
                     var JSONreservation = reservations.getJSONObject(i)
@@ -101,36 +105,36 @@ class ReservationsFragment : Fragment(){
                     var reservas = JSONreservation.getJSONArray("reservas")
                     for (j in 0 until reservas.length()) {
 
-                        var begginingHour = Date(reservas.getJSONObject(j).getString("desde").toLong()).hours.toString()
-                        var endHour = Date(reservas.getJSONObject(j).getString("hasta").toLong()).hours.toString()
-                        var reservation = Reservation(fieldName,begginingHour,endHour,"Franco")
+                        var startDate = fmtIn.parse((reservas.getJSONObject(j).getString("desde").toLong()/1000).toString())
+                        var endDate = fmtIn.parse(reservas.getJSONObject(j).getString("hasta"))
+
+                        var reservation = Reservation(fieldName,startDate,endDate,"Franco")
                         reservationsArray.add(reservation)
                     }
                 }
 
-                val adapter = ReservationsAdapter(context,reservationsArray.filterDateResults(null))
+                val adapter = ReservationsAdapter(context,reservationsArray.filterDateResults(filterDate))
                 reservationsList.adapter = adapter
             }
         }
 
-        fun ArrayList<Reservation>.filterDateResults(filterDate: String?): ArrayList<Reservation> {
+        fun ArrayList<Reservation>.filterDateResults(filterDate: Date?): ArrayList<Reservation> {
             if(filterDate == null){
                 return this
             }
 
             var list = ArrayList<Reservation>()
-
+            val filterHour = filterDate.hours
+            Log.d("FILTERHOUR", filterHour.toString())
             for (j in 0 until this.size) {
-
-                if(compareDateDay(Date(this[j].reservationBegginingHour),Date(filterDate))){
+                Log.d("EACH",this[j].reservationDate.hours.toString())
+                if(this[j].reservationDate.hours == filterHour){
                     list.add(this[j])
                 }
             }
             return list
         }
 
-        fun compareDateDay(date1: Date,date2: Date):Boolean =
-                ((date1.year)==(date2.year) && (date1.month)==(date2.month) && (date1.day)==(date2.day))
     }
 
 }

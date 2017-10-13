@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import com.example.fran.canchas2.R
 import com.example.fran.canchas2.R.layout.reservation_item
+import java.text.SimpleDateFormat
 
 
 class ReservationsAdapter(context: Context, reservations: ArrayList<Reservation>) : ArrayAdapter<Reservation>(context, 0, reservations) {
@@ -28,7 +29,9 @@ class ReservationsAdapter(context: Context, reservations: ArrayList<Reservation>
 
         // Populate the data into the template view using the data object
         val reservation = getItem(position)
-        reservationHour?.text = reservation.reservationBegginingHour + " - " + reservation.reservationEndHour + " hs"
+        val fmtOut = SimpleDateFormat("dd-MM-yyyy hh:mm")
+
+        reservationHour?.text = fmtOut.format(reservation.reservationDate)
         reservationClient?.text = reservation.reservationCurstomerName
         fieldNameView?.text = reservation.fieldName
 

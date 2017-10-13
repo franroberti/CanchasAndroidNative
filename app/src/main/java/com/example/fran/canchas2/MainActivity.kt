@@ -17,8 +17,12 @@ import android.view.MenuItem
 import com.example.fran.canchas2.views.MainFragment
 import android.content.Intent
 import android.support.v4.app.FragmentActivity
+import com.example.fran.canchas2.views.ContactActivity
 import com.example.fran.canchas2.views.MapsActivity
 import com.example.fran.canchas2.views.ReservationsFragment
+import android.support.v4.app.ShareCompat
+
+
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -83,9 +87,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else if (id == R.id.nav_tournaments) {
 
         } else if (id == R.id.nav_share) {
-
+            shareText("Fijate si hay reservas disponibles!")
         } else if (id == R.id.nav_contact) {
-
+            showFragment(ContactActivity())
         } else if (id == R.id.nav_map) {
             showFragment(MapsActivity())
         }
@@ -102,5 +106,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun showFragment(activity: FragmentActivity){
         val intent = Intent(this, activity.javaClass)
         startActivity(intent)
+    }
+
+    private fun shareText(textToShare: String) {
+        val mimeType = "text/plain"
+
+        val title = "Descarga la app!"
+
+        ShareCompat.IntentBuilder
+                .from(this)
+                .setType(mimeType)
+                .setChooserTitle(title)
+                .setText(textToShare)
+                .startChooser()
     }
 }
