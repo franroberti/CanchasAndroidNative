@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import com.example.fran.canchas2.R
 import com.example.fran.canchas2.utils.NetworkUtils
 import kotlinx.android.synthetic.main.content_reservations.*
@@ -19,7 +20,12 @@ import com.example.fran.canchas2.utils.Reservation
 import com.example.fran.canchas2.utils.ReservationsAdapter
 import java.text.SimpleDateFormat
 import android.widget.ArrayAdapter
+//import com.example.fran.canchas2.utils.FieldSpinnerFilterHandler
 import kotlin.collections.ArrayList
+import android.widget.AdapterView.OnItemSelectedListener
+import com.example.fran.canchas2.R.id.spinner
+
+
 
 
 /**
@@ -31,6 +37,7 @@ class ReservationsFragment : Fragment(){
     var response: String? = null
     var dayPicked: String? = null
     var fieldsArray = ArrayList<String>()
+    var reservationsArray = ArrayList<Reservation>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.content_reservations,container,false)
@@ -89,7 +96,6 @@ class ReservationsFragment : Fragment(){
             if (searchResults != null && searchResults != "") {
 
                 val reservations = JSONArray(searchResults)
-                var reservationsArray = ArrayList<Reservation>()
                 responseProgressBar.visibility = View.GONE
 
                 val fmtDayOut = SimpleDateFormat("dd-MM-yyyy")
@@ -98,12 +104,15 @@ class ReservationsFragment : Fragment(){
                 if(dayPicked != null) {
                     filterDate = fmtDayOut.parse(dayPicked)
                 }
-                fieldsArray.add("All")
+
                 for (i in 0 until reservations.length()) {
                     var JSONreservation = reservations.getJSONObject(i)
                     var fieldName = JSONreservation.getString("nombre")
                     var reservas = JSONreservation.getJSONArray("reservas")
-                    fieldsArray.add(fieldName)
+                    if(!fieldsArray.contains(fieldName)){
+                        fieldsArray.add(fieldName)
+                    }
+
                     for (j in 0 until reservas.length()) {
 
                         var startDate = fmtIn.parse((reservas.getJSONObject(j).getString("desde").toLong()/1000).toString())
@@ -120,46 +129,90 @@ class ReservationsFragment : Fragment(){
             }
         }
 
-        fun ArrayList<Reservation>.filterDateResults(filterDate: Date?,compareDate: (Date,Date)->Boolean ): ArrayList<Reservation> {
-            if(filterDate == null){
-                return this
-            }
-
-            var list = ArrayList<Reservation>()
-
-            for (j in 0 until this.size) {
-                if(compareDate(this[j].reservationDate,filterDate)){
-                    list.add(this[j])
-                }
-            }
-            return list
-        }
-        
-        fun ArrayList<Reservation>.filterFieldName(filterFieldName: String? ): ArrayList<Reservation> {
-            if(filterFieldName == null){
-                return this
-            }
-
-            var list = ArrayList<Reservation>()
-
-            for (j in 0 until this.size) {
-                if(this[j].fieldName == filterFieldName){
-                    list.add(this[j])
-                }
-            }
-            return list
-        }
     }
 
     fun showSpinner(){
-
-        val adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, fieldsArray)
+        if(!fieldsArray.contains("All")){
+            fieldsArray.add(0,"All")
+        }
+        val spinnerAdapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, fieldsArray)
 // Specify the layout to use when the list of choices appears
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 // Apply the adapter to the spinner
-        spinner.adapter = adapter
+
+        spinner.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onItemSelected(parentView: AdapterView<*>, selectedItemView: View, position: Int, id: Long) {
+                filterResults()
+            }
+
+            override fun onNothingSelected(parentView: AdapterView<*>) {
+
+            }
+
+        }
+
+        spinner.adapter = spinnerAdapter
+
         spinner.visibility = View.VISIBLE
     }
+
+    fun filterResults() {
+        spinner.selectedItem.toString()
+
+        val fmtDayOut = SimpleDateFormat("dd-MM-yyyy")
+        var filterDate: Date? = null
+        if(dayPicked != null) {
+            filterDate = fmtDayOut.parse(dayPicked)
+        }
+
+        val adapter = ReservationsAdapter(context,reservationsArray.filterDateResults(filterDate, ::isEqualDay).filterFieldName(spinner.selectedItem.toString()))
+        reservationsList.adapter = adapter
+    }
+
+    fun java.util.ArrayList<Reservation>.filterDateResults(filterDate: Date?, compareDate: (Date, Date)->Boolean ): java.util.ArrayList<Reservation> {
+        if(filterDate == null){
+            return this
+        }
+
+        var list = java.util.ArrayList<Reservation>()
+
+        for (j in 0 until this.size) {
+            if(compareDate(this[j].reservationDate,filterDate)){
+                list.add(this[j])
+            }
+        }
+        return list
+    }
+
+    fun java.util.ArrayList<Reservation>.filterFieldName(filterFieldName: String? ): java.util.ArrayList<Reservation> {
+        if(filterFieldName == null || filterFieldName == "All"){
+            return this
+        }
+
+        var list = java.util.ArrayList<Reservation>()
+
+        for (j in 0 until this.size) {
+            if(this[j].fieldName == filterFieldName){
+                list.add(this[j])
+            }
+        }
+        return list
+    }
+
+    class FieldSpinnerFilterHandler : AdapterView.OnItemSelectedListener {
+
+
+        override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
+            //Toast.makeText(parent.context,parent.getItemAtPosition(pos).toString(),
+            //      Toast.LENGTH_SHORT).show()
+
+        }
+
+        override fun onNothingSelected(arg0: AdapterView<*>) {
+            // TODO Auto-generated method stub
+        }
+    }
+
 }
 
 fun isEqualHour(dateToCompare: Date,against: Date): Boolean{
