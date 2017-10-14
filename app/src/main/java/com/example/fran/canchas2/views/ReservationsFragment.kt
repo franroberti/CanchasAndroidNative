@@ -1,7 +1,6 @@
 package com.example.fran.canchas2.views
 
 import android.app.DatePickerDialog
-import android.app.ListFragment
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -9,23 +8,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
 import com.example.fran.canchas2.R
 import com.example.fran.canchas2.utils.NetworkUtils
 import kotlinx.android.synthetic.main.content_reservations.*
 import org.json.JSONArray
-import org.json.JSONException
 import java.io.IOException
 import java.net.URL
 import java.util.*
-import android.widget.ArrayAdapter
-import com.example.fran.canchas2.R.id.fieldNameView
-import com.example.fran.canchas2.R.id.reservationHour
-import com.example.fran.canchas2.R.layout.reservation_item
 import com.example.fran.canchas2.utils.Reservation
 import com.example.fran.canchas2.utils.ReservationsAdapter
 import java.text.SimpleDateFormat
+import android.widget.ArrayAdapter
+import kotlin.collections.ArrayList
 
 
 /**
@@ -35,6 +29,8 @@ class ReservationsFragment : Fragment(){
     internal val CLUB_ID = "59b0ac5ab729bb0042bfcc8b"
     internal val API_URL = "https://canchas.ml/clubes/"
     var response: String? = null
+    var dayPicked: String? = null
+    var fieldsArray = ArrayList<String>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.content_reservations,container,false)
@@ -54,7 +50,8 @@ class ReservationsFragment : Fragment(){
 
         val dialog = DatePickerDialog(context,
                 DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
-                    datePicked.text = "$dayOfMonth/$monthOfYear/$year"
+                    datePicked.text = "$dayOfMonth-" + (monthOfYear+1) +"-$year"
+                    dayPicked = "$dayOfMonth-" + (monthOfYear+1) +"-$year"
                 }, year, month, day)
         dialog.show()
 
@@ -70,14 +67,14 @@ class ReservationsFragment : Fragment(){
 
     inner class SearchTask : AsyncTask<URL, Void, String>() {
 
-        // COMPLETED (2) Override the doInBackground metehod to perform the query. Return the results. (Hint: You've already written the code to perform the query)
         override fun doInBackground(vararg params: URL): String? {
+            if(response!= null){
+                return response
+            }
+
             var searchResults: String? = null
             try {
-                responseProgressBar.progress = 25
                 searchResults = NetworkUtils().responseFromHttpUrl(params[0])
-                responseProgressBar.progress = 50
-
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -95,14 +92,18 @@ class ReservationsFragment : Fragment(){
                 var reservationsArray = ArrayList<Reservation>()
                 responseProgressBar.visibility = View.GONE
 
-                val fmtOut = SimpleDateFormat("dd-MM-yyyy hh:mm")
+                val fmtDayOut = SimpleDateFormat("dd-MM-yyyy")
                 val fmtIn = SimpleDateFormat("s")
-                val filterDate = fmtOut.parse("08-06-2017 23:00")
-
+                var filterDate: Date? = null
+                if(dayPicked != null) {
+                    filterDate = fmtDayOut.parse(dayPicked)
+                }
+                fieldsArray.add("All")
                 for (i in 0 until reservations.length()) {
                     var JSONreservation = reservations.getJSONObject(i)
                     var fieldName = JSONreservation.getString("nombre")
                     var reservas = JSONreservation.getJSONArray("reservas")
+                    fieldsArray.add(fieldName)
                     for (j in 0 until reservas.length()) {
 
                         var startDate = fmtIn.parse((reservas.getJSONObject(j).getString("desde").toLong()/1000).toString())
@@ -113,28 +114,69 @@ class ReservationsFragment : Fragment(){
                     }
                 }
 
-                val adapter = ReservationsAdapter(context,reservationsArray.filterDateResults(filterDate))
+                val adapter = ReservationsAdapter(context,reservationsArray.filterDateResults(filterDate, ::isEqualDay))
                 reservationsList.adapter = adapter
+                showSpinner()
             }
         }
 
-        fun ArrayList<Reservation>.filterDateResults(filterDate: Date?): ArrayList<Reservation> {
+        fun ArrayList<Reservation>.filterDateResults(filterDate: Date?,compareDate: (Date,Date)->Boolean ): ArrayList<Reservation> {
             if(filterDate == null){
                 return this
             }
 
             var list = ArrayList<Reservation>()
-            val filterHour = filterDate.hours
-            Log.d("FILTERHOUR", filterHour.toString())
+
             for (j in 0 until this.size) {
-                Log.d("EACH",this[j].reservationDate.hours.toString())
-                if(this[j].reservationDate.hours == filterHour){
+                if(compareDate(this[j].reservationDate,filterDate)){
                     list.add(this[j])
                 }
             }
             return list
         }
+        
+        fun ArrayList<Reservation>.filterFieldName(filterFieldName: String? ): ArrayList<Reservation> {
+            if(filterFieldName == null){
+                return this
+            }
 
+            var list = ArrayList<Reservation>()
+
+            for (j in 0 until this.size) {
+                if(this[j].fieldName == filterFieldName){
+                    list.add(this[j])
+                }
+            }
+            return list
+        }
     }
 
+    fun showSpinner(){
+
+        val adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, fieldsArray)
+// Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+// Apply the adapter to the spinner
+        spinner.adapter = adapter
+        spinner.visibility = View.VISIBLE
+    }
+}
+
+fun isEqualHour(dateToCompare: Date,against: Date): Boolean{
+
+    if(     dateToCompare.hours != against.hours ||
+            dateToCompare.day != against.day ||
+            dateToCompare.month != against.month ||
+            dateToCompare.year != against.year){
+        return false
+    }
+    return true
+}
+fun isEqualDay(dateToCompare: Date,against: Date): Boolean{
+    if(     dateToCompare.day != against.day ||
+            dateToCompare.month != against.month ||
+            dateToCompare.year != against.year){
+        return false
+    }
+    return true
 }

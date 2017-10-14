@@ -40,6 +40,12 @@
 
     </LinearLayout>
 
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="47dp"
+        android:visibility="gone"/>
+
     <Button
         android:backgroundTint="@color/colorPrimary"
         android:id="@+id/reservationsRequest"
