@@ -4,13 +4,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/football_background"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.fran.canchas2.MainActivity">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_marginTop="40dp"
+        android:textColor="#fff"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="Alta Cancha"
+        android:textSize="30sp"
+        android:textAlignment="center"
+
+        />
+    <TextView
+        android:layout_marginTop="40dp"
+        android:textColor="#e10f0f"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mira los horarios disponibles de nuestras canchas"
+        android:textSize="30sp"
+        android:textAlignment="center"
         />
 
+    <TextView
+        android:layout_marginTop="40dp"
+        android:textColor="#c418c7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sumate a los torneos!"
+        android:textSize="30sp"
+        android:textAlignment="center"
+        />
+    <TextView
+        android:layout_marginTop="40dp"
+        android:textColor="#18bec7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Futbol 7 y futbol 5"
+        android:textSize="30sp"
+        android:textAlignment="center"
+        />
 </LinearLayout>

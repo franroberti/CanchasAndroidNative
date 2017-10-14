@@ -20,10 +20,9 @@ import com.example.fran.canchas2.utils.Reservation
 import com.example.fran.canchas2.utils.ReservationsAdapter
 import java.text.SimpleDateFormat
 import android.widget.ArrayAdapter
-//import com.example.fran.canchas2.utils.FieldSpinnerFilterHandler
 import kotlin.collections.ArrayList
 import android.widget.AdapterView.OnItemSelectedListener
-import com.example.fran.canchas2.R.id.spinner
+import android.widget.Toast
 
 
 
@@ -105,24 +104,26 @@ class ReservationsFragment : Fragment(){
                     filterDate = fmtDayOut.parse(dayPicked)
                 }
 
-                for (i in 0 until reservations.length()) {
-                    var JSONreservation = reservations.getJSONObject(i)
-                    var fieldName = JSONreservation.getString("nombre")
-                    var reservas = JSONreservation.getJSONArray("reservas")
-                    if(!fieldsArray.contains(fieldName)){
-                        fieldsArray.add(fieldName)
-                    }
+                if(reservationsArray.size == 0) {
 
-                    for (j in 0 until reservas.length()) {
+                    for (i in 0 until reservations.length()) {
+                        var JSONreservation = reservations.getJSONObject(i)
+                        var fieldName = JSONreservation.getString("nombre")
+                        var reservas = JSONreservation.getJSONArray("reservas")
+                        if (!fieldsArray.contains(fieldName)) {
+                            fieldsArray.add(fieldName)
+                        }
 
-                        var startDate = fmtIn.parse((reservas.getJSONObject(j).getString("desde").toLong()/1000).toString())
-                        var endDate = fmtIn.parse(reservas.getJSONObject(j).getString("hasta"))
+                        for (j in 0 until reservas.length()) {
 
-                        var reservation = Reservation(fieldName,startDate,endDate,"Franco")
-                        reservationsArray.add(reservation)
+                            var startDate = fmtIn.parse((reservas.getJSONObject(j).getString("desde").toLong() / 1000).toString())
+                            var endDate = fmtIn.parse(reservas.getJSONObject(j).getString("hasta"))
+
+                            var reservation = Reservation(fieldName, startDate, endDate, "Franco")
+                            reservationsArray.add(reservation)
+                        }
                     }
                 }
-
                 val adapter = ReservationsAdapter(context,reservationsArray.filterDateResults(filterDate, ::isEqualDay))
                 reservationsList.adapter = adapter
                 showSpinner()
@@ -181,6 +182,11 @@ class ReservationsFragment : Fragment(){
                 list.add(this[j])
             }
         }
+
+        if(list.size == 0){
+            Toast.makeText(context,"No hay canchas reservadas en esta fecha!",
+                          Toast.LENGTH_SHORT).show()
+        }
         return list
     }
 
@@ -196,21 +202,11 @@ class ReservationsFragment : Fragment(){
                 list.add(this[j])
             }
         }
+        if(list.size == 0){
+            Toast.makeText(context,"No hay canchas reservadas!",
+                    Toast.LENGTH_SHORT).show()
+        }
         return list
-    }
-
-    class FieldSpinnerFilterHandler : AdapterView.OnItemSelectedListener {
-
-
-        override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
-            //Toast.makeText(parent.context,parent.getItemAtPosition(pos).toString(),
-            //      Toast.LENGTH_SHORT).show()
-
-        }
-
-        override fun onNothingSelected(arg0: AdapterView<*>) {
-            // TODO Auto-generated method stub
-        }
     }
 
 }
@@ -226,9 +222,13 @@ fun isEqualHour(dateToCompare: Date,against: Date): Boolean{
     return true
 }
 fun isEqualDay(dateToCompare: Date,against: Date): Boolean{
-    if(     dateToCompare.day != against.day ||
-            dateToCompare.month != against.month ||
-            dateToCompare.year != against.year){
+    val fmtDay = SimpleDateFormat("dd")
+    val fmtMonth = SimpleDateFormat("MM")
+    val fmtYear = SimpleDateFormat("yyyy")
+
+    if(     fmtDay.format(dateToCompare) != fmtDay.format(against) ||
+            fmtMonth.format(dateToCompare) != fmtMonth.format(against)  ||
+            fmtYear.format(dateToCompare) != fmtYear.format(against) ){
         return false
     }
     return true
